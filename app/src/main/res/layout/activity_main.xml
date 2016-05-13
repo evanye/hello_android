@@ -24,7 +24,7 @@
         android:layout_height="fill_parent"
         android:layout_weight="1"
         android:scaleType="fitXY"
-        android:src="@drawable/dog"
+        android:src="@drawable/dog1"
         android:onClick="dogClick" />
 
     <ImageButton
@@ -33,6 +33,6 @@
         android:layout_height="fill_parent"
         android:layout_weight="1"
         android:scaleType="fitXY"
-        android:src="@drawable/cat"
+        android:src="@drawable/cat0"
         android:onClick="catClick" />
 </LinearLayout>

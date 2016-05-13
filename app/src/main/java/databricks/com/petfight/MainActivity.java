@@ -1,9 +1,11 @@
 package databricks.com.petfight;
 
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.ImageButton;
 
 import java.io.DataOutputStream;
 import java.net.HttpURLConnection;
@@ -15,11 +17,9 @@ import io.swagger.client.model.PostitPostIt;
 
 public class MainActivity extends AppCompatActivity {
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-    }
+    private static final int[] catImageIds = new int[] {R.drawable.cat0, R.drawable.cat1, R.drawable.cat2, R.drawable.cat3, R.drawable.cat4};
+    private static final int[] dogImageIds = new int[] {R.drawable.dog1, R.drawable.dog2, R.drawable.dog3};
+    private static int cat = 0, dog = 0;
 
     private static final String endpoint = "http://postit.dev.databricks.com";
     private static final PostItServiceApi api = new PostItServiceApi();
@@ -29,17 +29,34 @@ public class MainActivity extends AppCompatActivity {
     private static final String payloadCat = "{\"name\": \"CAT\", \"age\": 24 }";
     private static final String payloadDog = "{\"name\": \"DOG\", \"age\": 24 }";
 
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        api.setBasePath(endpoint);
+        setContentView(R.layout.activity_main);
+    }
 
     /** Called when the user clicks the cat button */
     public void catClick(View view) {
         System.out.println("Cat!");
         post(payloadCat);
+        ImageButton btn = (ImageButton) findViewById(R.id.catButton);
+        cat = (cat + 1) % catImageIds.length;
+//        btn.setImageResource(catImageIds[cat]);
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inSampleSize = 8;
+        btn.setImageBitmap(BitmapFactory.decodeResource(getResources(), catImageIds[cat], options));
     }
 
     /** Called when the user clicks the dog button */
     public void dogClick(View view) {
         System.out.println("Dog!");
         post(payloadDog);
+        ImageButton btn = (ImageButton) findViewById(R.id.dogButton);
+        dog = (dog + 1) % dogImageIds.length;
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inSampleSize = 8;
+        btn.setImageBitmap(BitmapFactory.decodeResource(getResources(), dogImageIds[dog], options));
     }
 
     public void post(final String payload){
@@ -47,7 +64,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             protected Void doInBackground(Void... params) {
                 try {
-                    api.setBasePath(endpoint);
                     PostitPostIt body = new PostitPostIt();
                     body.setApiKey(apiKey);
                     body.setEventTime(System.nanoTime());
