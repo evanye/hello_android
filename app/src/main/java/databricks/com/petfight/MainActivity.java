@@ -9,6 +9,9 @@ import java.io.DataOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import io.swagger.client.api.PostItServiceApi;
+import io.swagger.client.model.PostitPostIt;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -18,12 +21,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
     }
 
-    private static final String endpoint = "http://postit.dev.databricks.com/api/1.0";
+    private static final String endpoint = "http://postit.dev.databricks.com";
+    private static final PostItServiceApi api = new PostItServiceApi();
 
     private static final String apiKey = "a2f4f593-720e-405f-9304-12dfe6915cc3";
 
-    private static final String payloadCat = "{\"api_key\": \"a2f4f593-720e-405f-9304-12dfe6915cc3\", \"payload\": \"{\\\"name\": \\\"CAT\\\", \\\"age\\\": 24 }\"}";
-    private static final String payloadDog = "{\"api_key\": \"a2f4f593-720e-405f-9304-12dfe6915cc3\", \"payload\": \"{\\\"name\": \\\"DOG\\\", \\\"age\\\": 24 }\"}";
+    private static final String payloadCat = "{\"name\": \"CAT\", \"age\": 24 }";
+    private static final String payloadDog = "{\"name\": \"DOG\", \"age\": 24 }";
 
 
     /** Called when the user clicks the cat button */
@@ -43,21 +47,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             protected Void doInBackground(Void... params) {
                 try {
-                    URL url = new URL(endpoint);
-                    byte[] postData       = payload.getBytes();
-                    int    postDataLength = postData.length;
-
-                    HttpURLConnection conn= (HttpURLConnection) url.openConnection();
-                    conn.setDoOutput( true );
-                    conn.setInstanceFollowRedirects( false );
-                    conn.setRequestMethod( "POST" );
-//                    conn.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded");
-//                    conn.setRequestProperty( "charset", "utf-8");
-                    conn.setRequestProperty( "Content-Length", Integer.toString( postDataLength ));
-                    conn.setUseCaches( false );
-                    DataOutputStream wr = new DataOutputStream( conn.getOutputStream());
-                    wr.write( postData );
-                    System.out.println(payload);
+                    api.setBasePath(endpoint);
+                    PostitPostIt body = new PostitPostIt();
+                    body.setApiKey(apiKey);
+                    body.setEventTime(System.nanoTime());
+                    body.setPayload(payload);
+                    api.postIt(body);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
