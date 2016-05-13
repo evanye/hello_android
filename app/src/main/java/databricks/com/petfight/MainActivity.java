@@ -24,10 +24,10 @@ public class MainActivity extends AppCompatActivity {
     private static final String endpoint = "http://postit.dev.databricks.com";
     private static final PostItServiceApi api = new PostItServiceApi();
 
-    private static final String apiKey = "a2f4f593-720e-405f-9304-12dfe6915cc3";
+    private static final String apiKey = "cf73fca1-2fc5-4709-890b-824dc6c1e977";
 
-    private static final String payloadCat = "{\"name\": \"CAT\", \"age\": 24 }";
-    private static final String payloadDog = "{\"name\": \"DOG\", \"age\": 24 }";
+    private static final String payloadCat = "{\"pet\": \"CAT\"}";
+    private static final String payloadDog = "{\"pet\": \"DOG\"}";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +42,6 @@ public class MainActivity extends AppCompatActivity {
         post(payloadCat);
         ImageButton btn = (ImageButton) findViewById(R.id.catButton);
         cat = (cat + 1) % catImageIds.length;
-//        btn.setImageResource(catImageIds[cat]);
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inSampleSize = 8;
         btn.setImageBitmap(BitmapFactory.decodeResource(getResources(), catImageIds[cat], options));
@@ -66,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     PostitPostIt body = new PostitPostIt();
                     body.setApiKey(apiKey);
-                    body.setEventTime(System.nanoTime());
+                    body.setEventTime(System.currentTimeMillis());
                     body.setPayload(payload);
                     api.postIt(body);
                 } catch (Exception e) {
