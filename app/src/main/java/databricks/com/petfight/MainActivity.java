@@ -1,11 +1,20 @@
 package databricks.com.petfight;
 
 import android.graphics.BitmapFactory;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.format.Formatter;
 import android.view.View;
 import android.widget.ImageButton;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 
 import java.io.DataOutputStream;
 import java.net.HttpURLConnection;
@@ -24,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
     Random r = new Random();
 
+    private static String ip = "";
     private static final String endpoint = "http://postit.dev.databricks.com";
     private static final PostItServiceApi api = new PostItServiceApi();
 
@@ -31,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        getCurrentIP();
         super.onCreate(savedInstanceState);
         api.setBasePath(endpoint);
         setContentView(R.layout.activity_main);
@@ -67,6 +78,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             protected Void doInBackground(Void... params) {
                 try {
+                    while(ip.equals("")) {
+                        System.out.println("still getting ip :(");
+                        Thread.sleep(1000);
+                    }
                     String bodyStr = payload.toString();
                     System.out.println("body: " + bodyStr);
                     PostitPostIt body = new PostitPostIt();
@@ -74,6 +89,38 @@ public class MainActivity extends AppCompatActivity {
                     body.setEventTime(System.currentTimeMillis());
                     body.setPayload(bodyStr);
                     api.postIt(body);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+        }
+        new Task().execute();
+    }
+
+    /**
+     * http://stackoverflow.com/questions/6064510/how-to-get-ip-address-of-the-device
+     */
+    public void getCurrentIP () {
+        class Task extends AsyncTask<Void, Void, Void> {
+            @Override
+            protected Void doInBackground(Void... params) {
+                try {
+                    HttpClient httpclient = new DefaultHttpClient();
+                    HttpGet httpget = new HttpGet("https://api.ipify.org");
+                    HttpResponse response;
+
+                    response = httpclient.execute(httpget);
+
+                    HttpEntity entity = response.getEntity();
+                    if (entity != null) {
+                        long len = entity.getContentLength();
+                        if (len != -1 && len < 1024) {
+                            ip = EntityUtils.toString(entity);
+                            System.out.println("IP address: " + ip);
+                            api.addHeader("X-Forwarded-For", ip);
+                        }
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
